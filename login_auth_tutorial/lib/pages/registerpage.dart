@@ -1,23 +1,20 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:login_auth_tutorial/pages/registerpage.dart';
+import 'package:login_auth_tutorial/pages/login_page.dart';
 import 'package:login_auth_tutorial/services/auth_services.dart';
 import 'package:login_auth_tutorial/utils/my_button_one.dart';
 import 'package:login_auth_tutorial/utils/my_button_two.dart';
 
 import '../utils/text_input_area.dart';
 
-class LoginPage extends StatelessWidget {
+class RegisterPage extends StatelessWidget {
   var emailController = TextEditingController();
   var passwordController = TextEditingController();
+  var confPasswordController = TextEditingController();
   @override
   Widget build(BuildContext context) {
-    void changePage(Widget targetPage) {
-      Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => targetPage,
-          ));
+    void goBack() {
+      Navigator.pop(context);
     }
 
     void displayMessage(var message) {
@@ -40,6 +37,7 @@ class LoginPage extends StatelessWidget {
                     backgroundColor: Colors.black,
                   ),
                   onPressed: () {
+                    Navigator.pop(context);
                     Navigator.pop(context);
                   },
                   child: Text(
@@ -92,7 +90,7 @@ class LoginPage extends StatelessWidget {
       );
     }
 
-    void signIn() async {
+    void signUp() async {
       showDialog(
         context: context,
         builder: (context) {
@@ -103,11 +101,17 @@ class LoginPage extends StatelessWidget {
       );
       // Place code to sign a user in here
       try {
-        await FirebaseAuth.instance.signInWithEmailAndPassword(
-          email: emailController.text,
-          password: passwordController.text,
-        );
-        Navigator.pop(context);
+        if (passwordController.text == confPasswordController.text) {
+          await FirebaseAuth.instance.createUserWithEmailAndPassword(
+            email: emailController.text,
+            password: passwordController.text,
+          );
+          Navigator.pop(context);
+          displayMessage("Account created");
+        } else {
+          Navigator.pop(context);
+          wrongDetail("Password and Confirm password are not the same");
+        }
       } on FirebaseAuthException catch (e) {
         if (e.code == "user-not-found") {
           Navigator.pop(context);
@@ -122,6 +126,7 @@ class LoginPage extends StatelessWidget {
       // Navigator.pop(context);
 
       passwordController.clear();
+      confPasswordController.clear();
     }
 
     return Scaffold(
@@ -137,10 +142,10 @@ class LoginPage extends StatelessWidget {
                 Spacer(),
                 const Icon(
                   Icons.lock,
-                  size: 100,
+                  size: 50,
                 ),
                 SizedBox(height: 30),
-                Center(child: Text("Welcome back")),
+                Center(child: Text("Welcome")),
                 SizedBox(height: 20),
                 TextInputArea(
                   isPass: false,
@@ -154,11 +159,17 @@ class LoginPage extends StatelessWidget {
                   myContoller: passwordController,
                 ),
                 SizedBox(height: 10),
+                TextInputArea(
+                  isPass: true,
+                  labelText: "Confrim password",
+                  myContoller: confPasswordController,
+                ),
+                SizedBox(height: 10),
                 Row(
                   children: [
                     const Spacer(),
                     Text(
-                      "Forgot password?",
+                      " ",
                       style: TextStyle(color: Colors.blue),
                     ),
                   ],
@@ -166,9 +177,9 @@ class LoginPage extends StatelessWidget {
                 const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () {
-                    signIn();
+                    signUp();
                   },
-                  child: MyButton(buttonText: "Login"),
+                  child: MyButton(buttonText: "Register"),
                 ),
                 SizedBox(height: 30),
                 Center(child: const Text("Or continue with")),
@@ -177,35 +188,34 @@ class LoginPage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     GestureDetector(
-                      onTap: () {
-                        displayMessage(
-                            "Sorry this service is not yet available");
-                      },
-                      child: MyButtonTwo("lib/assets/google.png"),
-                    ),
+                        onTap: () {
+                          displayMessage(
+                              "Sorry this service is not yet available");
+                        },
+                        child: MyButtonTwo("lib/assets/apple.png")),
                     SizedBox(width: 30),
                     GestureDetector(
                         onTap: () {
                           displayMessage(
                               "Sorry this service is not yet available");
                         },
-                        child: MyButtonTwo("lib/assets/apple.png")),
+                        child: MyButtonTwo("lib/assets/google.png")),
                   ],
                 ),
-                const SizedBox(height: 20),
+                SizedBox(height: 30),
                 Row(
                   children: [
                     Spacer(),
                     Text(
-                      "Don't have an account? ",
+                      "Already have an account? ",
                       style: TextStyle(color: Colors.black),
                     ),
                     GestureDetector(
                       onTap: () {
-                        changePage(RegisterPage());
+                        goBack();
                       },
                       child: Text(
-                        "Register now",
+                        "Login",
                         style: TextStyle(
                           color: Colors.blue,
                           fontWeight: FontWeight.bold,
